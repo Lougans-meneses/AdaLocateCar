@@ -3,10 +3,11 @@ package src.services;
 import src.models.*;
 import java.util.*;
 
-public class VeiculoService {
+public class VeiculoService implements ICadastravel<Veiculo>, IAlteravel<Veiculo>, IBuscavel<Veiculo> {
     private Map<String, Veiculo> veiculos = new HashMap<>(); // placa como chave
 
-    public boolean cadastrarVeiculo(Veiculo veiculo) {
+    @Override
+    public boolean cadastrar(Veiculo veiculo) {
         if (veiculos.containsKey(veiculo.getPlaca())) {
             return false;
         }
@@ -14,13 +15,15 @@ public class VeiculoService {
         return true;
     }
 
-    public boolean alterarVeiculo(String placa, String novoModelo) {
+    @Override
+    public boolean alterar(String placa, String novoModelo) {
         Veiculo v = veiculos.get(placa);
         if (v == null) return false;
         v.setModelo(novoModelo);
         return true;
     }
 
+    @Override
     public List<Veiculo> buscarPorNome(String parteNome) {
         List<Veiculo> resultado = new ArrayList<>();
         for (Veiculo v : veiculos.values()) {

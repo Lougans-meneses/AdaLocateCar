@@ -3,10 +3,11 @@ package src.services;
 import src.models.*;
 import java.util.*;
 
-public class ClienteService {
+public class ClienteService implements ICadastravel<Cliente>, IAlteravel<Cliente>, IBuscavel<Cliente> {
     private Map<String, Cliente> clientes = new HashMap<>();
 
-    public boolean cadastrarCliente(Cliente cliente) {
+    @Override
+    public boolean cadastrar(Cliente cliente) {
         if (clientes.containsKey(cliente.getDocumento())) {
             return false;
         }
@@ -14,13 +15,15 @@ public class ClienteService {
         return true;
     }
 
-    public boolean alterarCliente(String documento, String novoNome) {
+    @Override
+    public boolean alterar(String documento, String novoNome) {
         Cliente c = clientes.get(documento);
         if (c == null) return false;
         c.setNome(novoNome);
         return true;
     }
 
+    @Override
     public List<Cliente> buscarPorNome(String parteNome) {
         List<Cliente> resultado = new ArrayList<>();
         for (Cliente v : clientes.values()) {
