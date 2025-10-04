@@ -14,7 +14,9 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         while (true) {
-            System.out.println("\nMenu:");
+            System.out.println("\n======================================");
+            System.out.println("        LOCADORA DE VEÍCULOS");
+            System.out.println("======================================");
             System.out.println("1 - Cadastrar veículo");
             System.out.println("2 - Alterar veículo");
             System.out.println("3 - Buscar veículo por nome");
@@ -24,8 +26,16 @@ public class Main {
             System.out.println("7 - Alterar cliente PJ");
             System.out.println("8 - Alugar veículo");
             System.out.println("9 - Devolver veículo");
+            System.out.println("10 - Listar veículos cadastrados");
+            System.out.println("11 - Listar clientes cadastrados");
             System.out.println("0 - Sair");
-            int op = sc.nextInt(); sc.nextLine();
+            int op;
+            try {
+                op = Integer.parseInt(sc.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Digite um número válido!");
+                continue;
+            }
             if (op == 0) break;
             switch (op) {
                 case 1:
@@ -66,20 +76,26 @@ public class Main {
                     String nomePF = sc.nextLine();
                     System.out.print("CPF: ");
                     String cpf = sc.nextLine();
-                    if (clienteService.cadastrar(new PessoaFisica(nomePF, cpf)))
-                        System.out.println("Cliente PF cadastrado!");
-                    else
+                    if (clienteService.buscarPorDocumento(cpf) != null) {
                         System.out.println("CPF já cadastrado!");
+                    } else if (clienteService.cadastrar(new PessoaFisica(nomePF, cpf))) {
+                        System.out.println("Cliente PF cadastrado!");
+                    } else {
+                        System.out.println("Erro ao cadastrar cliente!");
+                    }
                     break;
                 case 5:
                     System.out.print("Nome: ");
                     String nomePJ = sc.nextLine();
                     System.out.print("CNPJ: ");
                     String cnpj = sc.nextLine();
-                    if (clienteService.cadastrar(new PessoaJuridica(nomePJ, cnpj)))
-                        System.out.println("Cliente PJ cadastrado!");
-                    else
+                    if (clienteService.buscarPorDocumento(cnpj) != null) {
                         System.out.println("CNPJ já cadastrado!");
+                    } else if (clienteService.cadastrar(new PessoaJuridica(nomePJ, cnpj))) {
+                        System.out.println("Cliente PJ cadastrado!");
+                    } else {
+                        System.out.println("Erro ao cadastrar cliente!");
+                    }
                     break;
                 case 6:
                     System.out.print("CPF: ");
@@ -122,16 +138,9 @@ public class Main {
                         }
                     }
                     System.out.print("Cliente (PF ou PJ): ");
-                    String tipoCli = sc.nextLine().toUpperCase();
-                    Cliente cliente = null;
-                    System.out.print(tipoCli.equals("PF") ? "CPF: " : "CNPJ: ");
+                    String tipoCli = sc.nextLine().toUpperCase();System.out.print(tipoCli.equals("PF") ? "CPF: " : "CNPJ: ");
                     String doc = sc.nextLine();
-                    for (Cliente c : clienteService.buscarPorNome("")) {
-                        if (c.getDocumento().equals(doc)) {
-                            cliente = c;
-                            break;
-                        }
-                    }
+                    Cliente cliente = clienteService.buscarPorDocumento(doc);
                     if (cliente == null) {
                         System.out.println("Cliente não encontrado!");
                         break;
@@ -144,13 +153,10 @@ public class Main {
                 case 9:
                     System.out.print("Placa do veículo: ");
                     placa = sc.nextLine();
-                    Aluguel aluguel = null;
-                    for (Aluguel a : aluguelService.getAlugueis()) {
-                        if (a.getVeiculo().getPlaca().equals(placa) && a.getDevolucao() == null) {
-                            aluguel = a;
-                            break;
-                        }
-                    }
+                    Aluguel aluguel = aluguelService.getAlugueis().stream()
+                            .filter(a -> a.getVeiculo().getPlaca().equals(placa) && a.getDevolucao() == null)
+                            .findFirst()
+                            .orElse(null);
                     if (aluguel == null) {
                         System.out.println("Aluguel não encontrado!");
                         break;
@@ -167,6 +173,14 @@ public class Main {
                     }
                     double valor = aluguelService.devolverVeiculo(aluguel, devolucao);
                     System.out.println("Valor total: R$ " + valor);
+                    break;
+                case 10:
+                    veiculoService.buscarPorNome("").forEach(ve ->
+                            System.out.printf("%s - %s (%s)\n", ve.getPlaca(), ve.getModelo(), ve.isDisponivel() ? "Disponível" : "Alugado"));
+                    break;
+                case 11:
+                    clienteService.buscarPorNome("").forEach(c ->
+                            System.out.printf("%s - %s\n", c.getDocumento(), c.getNome()));
                     break;
                 default:
                     System.out.println("Opção inválida!");
