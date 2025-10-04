@@ -2,6 +2,9 @@ package src.services;
 
 import src.models.*;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class ClienteService implements ICadastravel<Cliente>, IAlteravel<Cliente>, IBuscavel<Cliente> {
     private Map<String, Cliente> clientes = new HashMap<>();
@@ -25,12 +28,24 @@ public class ClienteService implements ICadastravel<Cliente>, IAlteravel<Cliente
 
     @Override
     public List<Cliente> buscarPorNome(String parteNome) {
-        List<Cliente> resultado = new ArrayList<>();
-        for (Cliente v : clientes.values()) {
-            if (v.getNome().toLowerCase().contains(parteNome.toLowerCase())) {
-                resultado.add(v);
-            }
-        }
-        return resultado;
+        Predicate<Cliente> filtroPorNome = c ->
+                c.getNome().toLowerCase().contains(parteNome.toLowerCase());
+
+        return clientes.values().stream()
+                .filter(filtroPorNome)
+                .sorted(Comparator.comparing(Cliente::getNome))
+                .map(c -> new Cliente(c.getNome().trim(), c.getDocumento()) {
+                })
+                .collect(Collectors.toList());
     }
+
+    public void normalizarNomes() {
+        Consumer<Cliente> normalizar = c -> c.setNome(c.getNome().trim());
+        clientes.values().forEach(normalizar);
+    }
+
+    public Cliente buscarPorDocumento(String documento) {
+        return clientes.get(documento);
+    }
+
 }
