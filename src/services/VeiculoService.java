@@ -2,6 +2,8 @@ package src.services;
 
 import src.models.*;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class VeiculoService implements ICadastravel<Veiculo>, IAlteravel<Veiculo>, IBuscavel<Veiculo> {
     private Map<String, Veiculo> veiculos = new HashMap<>(); // placa como chave
@@ -25,13 +27,21 @@ public class VeiculoService implements ICadastravel<Veiculo>, IAlteravel<Veiculo
 
     @Override
     public List<Veiculo> buscarPorNome(String parteNome) {
-        List<Veiculo> resultado = new ArrayList<>();
-        for (Veiculo v : veiculos.values()) {
-            if (v.getModelo().toLowerCase().contains(parteNome.toLowerCase())) {
-                resultado.add(v);
-            }
-        }
-        return resultado;
+        Function<Veiculo, String> extrairModelo = Veiculo::getModelo;
+        Predicate<Veiculo> filtroPorNome = v ->
+                extrairModelo.apply(v).toLowerCase().contains(parteNome.toLowerCase());
+
+        return veiculos.values().stream()
+                .filter(filtroPorNome)
+                .sorted(Comparator.comparing(extrairModelo))
+                .toList();
+    }
+
+    public List<Veiculo> listarDisponiveis() {
+        return veiculos.values().stream()
+                .filter(Veiculo::isDisponivel)
+                .sorted(Comparator.comparing(Veiculo::getModelo))
+                .toList();
     }
 
     public Veiculo buscarPorPlaca(String placa) {
