@@ -175,11 +175,29 @@ public class Main {
                     System.out.println("Valor total: R$ " + valor);
                     break;
                 case 10:
-                    veiculoService.buscarPorNome("").forEach(ve ->
+                    System.out.print("Tamanho da página: ");
+                    int tamanhoPaginaV = Integer.parseInt(sc.nextLine());
+                    System.out.print("Número da página: ");
+                    int paginaV = Integer.parseInt(sc.nextLine());
+                    int paginaIndiceV = Math.max(0, paginaV - 1);
+                    veiculoService.buscarPorNome("")
+                        .stream()
+                        .skip((long) paginaIndiceV * tamanhoPaginaV)
+                        .limit(tamanhoPaginaV)
+                        .forEach(ve ->
                             System.out.printf("%s - %s (%s)\n", ve.getPlaca(), ve.getModelo(), ve.isDisponivel() ? "Disponível" : "Alugado"));
                     break;
                 case 11:
-                    clienteService.buscarPorNome("").forEach(c ->
+                    System.out.print("Tamanho da página: ");
+                    int tamanhoPaginaC = Integer.parseInt(sc.nextLine());
+                    System.out.print("Número da página: ");
+                    int paginaC = Integer.parseInt(sc.nextLine());
+                    int paginaIndiceC = Math.max(0, paginaC - 1);
+                    clienteService.buscarPorNome("")
+                        .stream()
+                        .skip((long) paginaIndiceC * tamanhoPaginaC)
+                        .limit(tamanhoPaginaC)
+                        .forEach(c ->
                             System.out.printf("%s - %s\n", c.getDocumento(), c.getNome()));
                     break;
                 default:
